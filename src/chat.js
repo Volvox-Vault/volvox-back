@@ -68,6 +68,9 @@ module.exports = {
       messages.forEach((message) => ws.send(JSON.stringify(message)));
       ws.on("close", () => connections.delete(ws));
       ws.on("message", (data) => {
+        if(data.toString() === 'heartbeat') {
+          return;
+        }
         try {
           const json = JSON.parse(data.toString());
           const { name, code, message } = json;
