@@ -8,7 +8,7 @@ const database = path.join(__dirname, "..", "database", "chat.json");
 const HISTORY_LENGTH = 10_000;
 
 /**
- * @typedef {{name: string, hash: string, message: string}} Message
+ * @typedef {{name: string, hash: string, message: string, time: number}} Message
  *
  * @type Message[]
  */
@@ -57,6 +57,8 @@ function softError(message) {
   return new Error(`soft: ${message}`);
 }
 
+const allowedTimeInMs = 48 * 60 * 60 * 1000// 48 hours
+
 module.exports = {
   /**
    * @param {import('http').Server | import('https').Server} server
@@ -65,7 +67,8 @@ module.exports = {
     const wss = new WebSocket.Server({ server, path: "/chat" });
     wss.on("connection", (ws) => {
       connections.add(ws);
-      messages.forEach((message) => ws.send(JSON.stringify(message)));
+      const indexOfAllowedTime = messages.findIndex(message => (Date.now() - message.time) < allowedTimeInMs);
+      messages.slice(indexOfAllowedTime).forEach((message) => ws.send(JSON.stringify(message)));
       ws.on("close", () => connections.delete(ws));
       ws.on("message", (data) => {
         if(data.toString() === 'heartbeat') {
