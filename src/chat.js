@@ -57,7 +57,7 @@ function softError(message) {
   return new Error(`soft: ${message}`);
 }
 
-const allowedTimeInMs = 48 * 60 * 60 * 1000// 48 hours
+const allowedTimeInMs = 48 * 60 * 60 * 1000; // 48 hours
 
 module.exports = {
   /**
@@ -67,11 +67,18 @@ module.exports = {
     const wss = new WebSocket.Server({ server, path: "/chat" });
     wss.on("connection", (ws) => {
       connections.add(ws);
-      const indexOfAllowedTime = messages.findIndex(message => (Date.now() - message.time) < allowedTimeInMs);
-      messages.slice(indexOfAllowedTime).forEach((message) => ws.send(JSON.stringify(message)));
+      let indexOfAllowedTime = messages.findIndex(
+        (message) => Date.now() - message.time < allowedTimeInMs
+      );
+      if (indexOfAllowedTime === -1) {
+        indexOfAllowedTime = Infinity;
+      }
+      messages
+        .slice(indexOfAllowedTime)
+        .forEach((message) => ws.send(JSON.stringify(message)));
       ws.on("close", () => connections.delete(ws));
       ws.on("message", (data) => {
-        if(data.toString() === 'heartbeat') {
+        if (data.toString() === "heartbeat") {
           return;
         }
         try {
