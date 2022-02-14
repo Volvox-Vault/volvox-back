@@ -100,10 +100,10 @@ module.exports = {
       if (indexOfAllowedTime === -1) {
         indexOfAllowedTime = Infinity;
       }
+      ws.send(JSON.stringify({ admins: adminHashes }));
       messages
         .slice(indexOfAllowedTime)
         .forEach((message) => ws.send(JSON.stringify(message)));
-      ws.send(JSON.stringify({ admins: adminHashes }));
       ws.on("close", () => connections.delete(ws));
       ws.on("message", (data) => {
         if (data.toString() === "heartbeat") {
