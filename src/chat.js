@@ -146,8 +146,9 @@ module.exports = {
 
             saveMessages();
 
-            connections.forEach((c) => {
+            connections.forEach(async (c) => {
               c.send(JSON.stringify({ reload: true }));
+              await new Promise((res) => setTimeout(res, 1000));
               messages
                 .slice(indexOfAllowedTime)
                 .forEach((message) => ws.send(JSON.stringify(message)));
