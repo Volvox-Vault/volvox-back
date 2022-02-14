@@ -149,6 +149,12 @@ module.exports = {
             connections.forEach(async (c) => {
               c.send(JSON.stringify({ reload: true }));
               await new Promise((res) => setTimeout(res, 1000));
+              let indexOfAllowedTime = messages.findIndex(
+                (message) => Date.now() - message.time < allowedTimeInMs
+              );
+              if (indexOfAllowedTime === -1) {
+                indexOfAllowedTime = Infinity;
+              }
               messages
                 .slice(indexOfAllowedTime)
                 .forEach((message) => ws.send(JSON.stringify(message)));
