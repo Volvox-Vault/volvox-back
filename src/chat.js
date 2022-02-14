@@ -19,6 +19,33 @@ loadMessages();
 // Make sure this is the same on the front & backend!
 const salt = "!volvox!";
 
+const adminHashes = [
+  "b27c4615a13694b4a333a429a046599e002e0a0a2fcfa9fdfc92683f625152b3", // algae
+  "214daf1018e057516f40b9e6de727bf034ba748b2188ad7a311ed580834ec63e", // ari
+];
+const scrubbedName = [
+  "(°°)～",
+  "くコ:彡",
+  "≧(゜゜)≦",
+  "<º)))><",
+  "◕ᴥ◕",
+  ">゜)))彡",
+  "ミ．．ミ",
+  "><(((º>",
+  "><((((●ﾟ<",
+  ". ><{{{o ______)",
+  ">゜)))<",
+];
+const scrubbedMessages = [
+  "*splashes*",
+  "*drips*",
+  "*bubbles*",
+  "*glub*",
+  "*glub glub*",
+  "*fizzes*",
+  "*gurgles*",
+  "*bloop*",
+];
 /**
  * @param {string} name
  * @param {string} code
@@ -76,6 +103,7 @@ module.exports = {
       messages
         .slice(indexOfAllowedTime)
         .forEach((message) => ws.send(JSON.stringify(message)));
+      ws.send(JSON.stringify({ admins: adminHashes }));
       ws.on("close", () => connections.delete(ws));
       ws.on("message", (data) => {
         if (data.toString() === "heartbeat") {
@@ -83,6 +111,50 @@ module.exports = {
         }
         try {
           const json = JSON.parse(data.toString());
+          if ("delete" in json) {
+            const { hash, time, code } = json.delete;
+            if (!hash) {
+              throw softError("no hash passed to delete");
+            }
+            if (!time) {
+              throw softError("no time passed to delete");
+            }
+            const t = Number.parseInt(time, 10);
+            if (Number.isNaN(t)) {
+              throw softError("invalid time passed to delete");
+            }
+            const hashedCode = crypto
+              .createHash("sha256")
+              .update(Buffer.from(salt + code, "utf-8"))
+              .digest("hex");
+            if (!adminHashes.includes(hashedCode)) {
+              throw softError("you're not an admin");
+            }
+            const message = messages.find(
+              (m) => m.hash === hash && m.time === t
+            );
+            if (!message) {
+              throw softError("message not found to delete!");
+            }
+            // ok, remove!
+            message.name =
+              scrubbedName[Math.floor(Math.random() * scrubbedName.length)];
+            message.message =
+              scrubbedMessages[
+                Math.floor(Math.random() * scrubbedMessages.length)
+              ];
+
+            saveMessages();
+
+            connections.forEach((c) => {
+              c.send(JSON.stringify({ reload: true }));
+              messages
+                .slice(indexOfAllowedTime)
+                .forEach((message) => ws.send(JSON.stringify(message)));
+            });
+
+            return;
+          }
           const { name, code, message } = json;
           if (!name) {
             throw softError("enter a name");
