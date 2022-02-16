@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 
 const database = path.join(__dirname, "..", "database", "chat.json");
-
+const profanity = require("./bannedforprofanity");
 const HISTORY_LENGTH = 10_000;
 
 /**
@@ -163,14 +163,17 @@ module.exports = {
             return;
           }
           const { name, code, message } = json;
-          if (!name) {
+          if (!name || typeof name !== "string") {
             throw softError("enter a name");
           }
-          if (!code) {
+          if (!code || typeof code !== "string") {
             throw softError("enter a secret code");
           }
-          if (!message) {
+          if (!message || typeof message !== "string") {
             throw softError("enter a message");
+          }
+          if (profanity.some((word) => message.includes(word))) {
+            throw softError("that's not very nice.");
           }
           addMessage(name, code, message);
           printMessage(name, code, message);
