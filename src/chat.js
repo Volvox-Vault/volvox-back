@@ -202,15 +202,11 @@ function saveMessages() {
 }
 
 function loadMessages() {
-  fs.readFile(database, (err, data) => {
-    if (err) {
-      console.error(
-        "failed to read database from file, gonna create a new one!"
-      );
-    } else {
-      messages = JSON.parse(data.toString()).messages;
-    }
-  });
+  try {
+    messages = JSON.parse(fs.readFileSync(database, "utf-8"));
+  } catch (err) {
+    console.error("failed to read database from file, gonna create a new one!");
+  }
 }
 
 /**
