@@ -203,7 +203,7 @@ function saveMessages() {
 
 function loadMessages() {
   try {
-    messages = JSON.parse(fs.readFileSync(database, "utf-8"));
+    messages = JSON.parse(fs.readFileSync(database, "utf-8")).messages;
   } catch (err) {
     console.error("failed to read database from file, gonna create a new one!");
   }
