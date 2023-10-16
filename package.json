@@ -1,19 +1,19 @@
 {
   "name": "volvox-back",
   "version": "1.0.0",
-  "description": "",
+  "description": "A nice little chat server!",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --ignore 'database/' src/index.js"
+    "dev": "nodemon --ignore 'database/' src/index.js",
+    "start": "node src/index.js"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "^2.0.7"
+    "nodemon": "^2.0.19"
   },
   "dependencies": {
-    "typescript": "^4.2.4",
-    "ws": "^7.4.5"
+    "ws": "^8.8.1"
   }
 }
